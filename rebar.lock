@@ -3,6 +3,6 @@
        {ref,"3074d4865b3385a050badf7828ad31490d860df5"}},
   1},
  {<<"ntlm">>,
-  {git,"https://github.com/gotthardp/erlang-ntlm.git",
-       {ref,"9e78be32dd627d350f7ff0c52693c46b4e25fb02"}},
+  {git,"https://github.com/tumdash/erlang-ntlm.git",
+       {ref,"f473e85d7fa2a3ee2ef3c7d93aebfe84cc6c4ca8"}},
   0}].
