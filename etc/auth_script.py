@@ -9,8 +9,7 @@ class NtlmAuth(NtlmContext):
         return base64.b64encode(negotiate_message)
 
     def auth_msg(self, challenge_message):
-        ntlm_context = NtlmContext(self.username, self.password, self.domain, self.workstation, ntlm_compatibility=5
-        )
+        ntlm_context = NtlmContext(self.username, self.password, self.domain, self.workstation, ntlm_compatibility=5)
         negotiate_message = ntlm_context.step()
         authenticate_message = ntlm_context.step(challenge_message)
         return base64.b64encode(authenticate_message)
