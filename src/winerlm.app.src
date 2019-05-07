@@ -1,11 +1,11 @@
 {application, winerlm,
  [{description, "Windows Remote Management library"},
-  {vsn, "0.0.1"},
+  {vsn, "git"},
   {registered, []},
   {applications,
    [kernel,
     stdlib,
-    'erlang-ntlm'
+    uuid
    ]},
   {env,[]},
   {modules, []}

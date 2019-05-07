@@ -9,6 +9,9 @@
     enumerate_cim_instances/3
 ]).
 
+-define(ITEMS_PER_PULL, 1).
+-define(WSMAN_PORT, 5985).
+
 %%%=============================================================================
 %% API functions
 %%%=============================================================================
@@ -36,39 +39,44 @@
         KeyIdentity     :: map()
 ) ->
     {ok, CIMData :: map()} | {error, Reason :: term()}.
-get_cim_instance(ComputerName, Options, ClassName, KeyIdentity) ->
-	Uuid = <<"4E6FD101-710A-41EA-A50D-70C0BF863AA2">>,
-	EnumerateMsg = winerlm_xml:enumerate(ComputerName, ClassName, Uuid),
-	Destination = <<"http://", ComputerName/binary, ":5985/wsman">>,
-	Application = "application/soap+xml;charset=UTF-8",
-	UserName = binary_to_list(maps:get(user, Options)),
-	Password = binary_to_list(maps:get(password, Options)),
-	EnumResponse = ntlm_httpc:request_basic(
-		post,
-		{binary_to_list(Destination), [], Application, binary_to_list(EnumerateMsg)},
-		{"na", "na", UserName, Password}
-	),
-	case handle_response(EnumResponse) of
-		{enumeration_resp, EnumContext} ->
-			PullMsg = winerlm_xml:pull(ComputerName, ClassName, EnumContext, 1, Uuid),
-			PullResponse = ntlm_httpc:request_basic(
-				post,
-				{binary_to_list(Destination), [], Application, binary_to_list(PullMsg)},
-				{"na", "na", UserName, Password}
-			),
-			case handle_response(PullResponse) of
-				{pull_resp, ItemData} ->
-					{ok, ItemData};
-				{failure, Error} ->
-					{error, Error}
-			end;
-		{failure, Error} ->
-			{error, Error}
-	end.
+get_cim_instance(ComputerName, InputOptions, ClassName, _KeyIdentity) ->
+    DefOptions = load_defaults(InputOptions),
+    Uuid = list_to_binary(uuid:to_string(uuid:uuid1())),
+    {ok, HConnect} = hackney:connect(hackney_tcp, ComputerName, ?WSMAN_PORT, []),
+    Options = DefOptions#{connect => HConnect},
+    case process_enumerate(Options, ComputerName, ClassName, Uuid) of
+        {enumeration_resp, EnumCtx} ->
+            Res = process_pull(Options, ComputerName, ClassName, EnumCtx, Uuid),
+            handle_result(Res);
+        {failure, Error} ->
+            {error, Error}
+    end.
 
-%TODO handle errors always a good idea
-handle_response({ok, {_, _, XmlBody}}) ->
-	winerlm_xml:parse_response(XmlBody).
+process_enumerate(Options, ComputerName, ClassName, Uuid) ->
+    EnumMsg = winerlm_xml:enumerate(ComputerName, ClassName, Uuid),
+    case winerlm_transport:enumerate(Options, EnumMsg) of
+        {ok, EnumResponse} ->
+            winerlm_xml:parse_response(EnumResponse);
+        Err ->
+            Err
+    end.
+
+process_pull(Options, ComputerName, ClassName, EnumCtx, Uuid) ->
+    PullMsg = winerlm_xml:pull(ComputerName, ClassName, EnumCtx, ?ITEMS_PER_PULL, Uuid),
+    case winerlm_transport:pull(Options, PullMsg) of
+        {ok, PullResponse} ->
+            winerlm_xml:parse_response(PullResponse);
+        Err ->
+            Err
+    end.
+
+handle_result({pull_resp, ItemData}) ->
+    {ok, ItemData};
+handle_result({failure, Error}) ->
+    {error, Error}.
+
+load_defaults(Options) ->
+    maps:put(transport, maps:get(transport, Options, basic), Options).
 
 %% Filters specified CIM ClassNames with specified WQL from remote or local
 %% CIM-based system i.e.
