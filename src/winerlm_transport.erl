@@ -37,7 +37,7 @@ enumerate(#{transport := ntlm, connect := HConnect} = Options, Msg) ->
                     ],
                     SecureEnumReq = {post, <<"/wsman">>, SecHeaders, Msg},
                     case hackney:send_request(HConnect, SecureEnumReq) of
-                        {ok, 200, _, HConnect} ->
+                        {ok, _, _, HConnect} ->
                             hackney:body(HConnect);
                         Err ->
                             {error, {could_not_enumerate, Err}}
