@@ -21,7 +21,7 @@ negotiate_msg(Options) ->
     ScriptCmd = <<?NEGOTIATE_CMD,
         UserName/binary, " ", Password/binary, " ",
         DomainName/binary, " ", Workstation/binary>>,
-    %io:format("negotiate_msg scripting: ~p~n", [ScriptCmd]),
+    io:format("negotiate_msg scripting: ~p~n", [ScriptCmd]),
     StringResponse = os:cmd(binary_to_list(ScriptCmd)),
     chop_lf_end(list_to_binary(StringResponse)).
 
@@ -34,7 +34,7 @@ auth_msg(Options, ChallengeResponse) ->
         UserName/binary, " ", Password/binary, " ",
         DomainName/binary, " ", Workstation/binary, " ",
         ChallengeResponse/binary>>,
-    %io:format("authenticate scripting: ~p~n", [ScriptCmd]),
+    io:format("authenticate scripting: ~p~n", [ScriptCmd]),
     StringResponse = os:cmd(binary_to_list(ScriptCmd)),
     chop_lf_end(list_to_binary(StringResponse)).
 
