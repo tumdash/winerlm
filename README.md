@@ -57,8 +57,8 @@ So before starting using NTLM, its required this specific python library to be i
 so `etc/auth_script.py` could be successfully called from erlang.
 
 ```erlang
-2> Cred = #{user => <<"myUser">>, password =><<"MyPassOnWin123">>}.
-#{password => <<"MyPassOnWin123">>,user => <<"myUser">>}
+2> Cred = #{user => <<"myUser">>, password =><<"MyPassOnWin123">>, transport => ntlm}.
+#{password => <<"MyPassOnWin123">>,transport => ntlm, user => <<"myUser">>}
 3> winerlm:get_cim_instance(<<"3XX.XXX.XXX.XXX">>, Cred, <<"Win32_OperatingSystem">>, void).
 {ok,#{<<"RegisteredUser">> => <<"wisr">>,
       <<"DataExecutionPrevention_SupportPolicy">> => 3,

@@ -83,10 +83,14 @@ pull(ComputerName, ClassName, Context, MaxNum, Uuid) ->
 		>>.
 
 parse_response(XmlResponse) ->
-		Xml = try_scan_xml(binary_to_list(XmlResponse)),
-		[SoapMsg] = xmerl_xpath:string("//s:Envelope/s:Body/node()", Xml),
-		%io:format("BodyParse: ~p~n", [BodyParse]),
-		parse_type(SoapMsg, XmlResponse).
+		case try_scan_xml(binary_to_list(XmlResponse)) of
+				{ok, Xml} ->
+						[SoapMsg] = xmerl_xpath:string("//s:Envelope/s:Body/node()", Xml),
+						%io:format("BodyParse: ~p~n", [BodyParse]),
+						parse_type(SoapMsg, XmlResponse);
+				Err ->
+						Err
+		end.
 
 %%%=============================================================================
 %% Internal functions
@@ -124,7 +128,7 @@ try_scan_xml("") ->
 try_scan_xml(XmlBinary) ->
 		try xmerl_scan:string(XmlBinary) of
 				{Xml, _} ->
-						Xml
+						{ok, Xml}
 		catch
 				_:R ->
 						{failure, {scan_xml_error, XmlBinary, R}}
