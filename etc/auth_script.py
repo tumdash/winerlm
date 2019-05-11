@@ -21,7 +21,7 @@ if __name__ =='__main__':
             password=sys.argv[3],
             domain=sys.argv[4],
             workstation=sys.argv[5],
-            ntlm_compatibility=6
+            ntlm_compatibility=5
         )
         command = sys.argv[1]
         if command == 'negotiate':
