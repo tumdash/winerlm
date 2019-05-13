@@ -16,7 +16,7 @@
 %%%=============================================================================
 enumerate(#{transport := ntlm, connect := HConnect} = Options, Msg) ->
     NegMsg = winerlm_python:negotiate_msg(Options),
-    io:format("Negotiate msg ~p~n", [NegMsg]),
+    %io:format("Negotiate msg ~p~n", [NegMsg]),
     UnsecHeaders = [
       {<<"Content-Type">>, ?APPLICATION_TYPE},
       {<<"Authorization">>, <<"Negotiate ", NegMsg/binary>>}
@@ -28,9 +28,9 @@ enumerate(#{transport := ntlm, connect := HConnect} = Options, Msg) ->
             hackney:body(HConnect),
             case maps:get(<<"WWW-Authenticate">>, maps:from_list(RespHdrs), undefined) of
                 <<"Negotiate ", Challenge/binary>> ->
-                    io:format("Challenge msg ~p~n", [Challenge]),
+                    %io:format("Challenge msg ~p~n", [Challenge]),
                     AuthMsg = winerlm_python:auth_msg(Options, Challenge),
-                    io:format("Auth msg ~p~n", [AuthMsg]),
+                    %io:format("Auth msg ~p~n", [AuthMsg]),
                     SecHeaders = [
                       {<<"Content-Type">>, ?APPLICATION_TYPE},
                       {<<"Authorization">>, <<"Negotiate ", AuthMsg/binary>>}
