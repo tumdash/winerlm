@@ -15,8 +15,8 @@
 %% API functions
 %%%=============================================================================
 enumerate(#{transport := ntlm, connect := HConnect} = Options, Msg) ->
-    NegMsg = winerlm_python:negotiate_msg(Options),
-    %io:format("Negotiate msg ~p~n", [NegMsg]),
+    Negotiate = winerlm_ntlm:negotiate_v2(Options),
+    NegMsg = base64:encode(Negotiate),
     UnsecHeaders = [
       {<<"Content-Type">>, ?APPLICATION_TYPE},
       {<<"Authorization">>, <<"Negotiate ", NegMsg/binary>>}
@@ -27,10 +27,10 @@ enumerate(#{transport := ntlm, connect := HConnect} = Options, Msg) ->
         {ok, 401, RespHdrs, HConnect} ->
             hackney:body(HConnect),
             case maps:get(<<"WWW-Authenticate">>, maps:from_list(RespHdrs), undefined) of
-                <<"Negotiate ", Challenge/binary>> ->
-                    %io:format("Challenge msg ~p~n", [Challenge]),
-                    AuthMsg = winerlm_python:auth_msg(Options, Challenge),
-                    %io:format("Auth msg ~p~n", [AuthMsg]),
+                <<"Negotiate ", ChallengeMsg/binary>> ->
+                    Challenge = base64:decode(ChallengeMsg),
+                    Authenticate = winerlm_ntlm:authenticate_v2(Options, Negotiate, Challenge),
+                    AuthMsg = base64:encode(Authenticate),
                     SecHeaders = [
                       {<<"Content-Type">>, ?APPLICATION_TYPE},
                       {<<"Authorization">>, <<"Negotiate ", AuthMsg/binary>>}
