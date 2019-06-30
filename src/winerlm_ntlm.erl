@@ -183,7 +183,12 @@ kxkey(SessionBaseKey, _LmChallengeResponse, _ServerChallenge) ->
 
 % The encryption of data item with the key using the RC4 algorithm.
 rc4k(KeyExchangeKey, ExportedSessionKey) ->
-    crypto:crypto_one_time(rc4, KeyExchangeKey, ExportedSessionKey, _Encrypt = true).
+    case list_to_integer(erlang:system_info(otp_release)) of
+        BuiltinR when BuiltinR >= 22 ->
+            crypto:crypto_one_time(rc4, KeyExchangeKey, ExportedSessionKey, _Encrypt = true);
+        _NoBuiltinR ->
+            winerlm_crypto:rc4(KeyExchangeKey, ExportedSessionKey)
+    end.
 
 % NTLMv2 [3.3.2] of [MS-NLMP]
 % Define NTOWFv2(Passwd, User, UserDom) as
