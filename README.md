@@ -49,13 +49,6 @@ so before doing any examples this need to be started e.g.
 
 ## NTLM Auth
 
-Unfortunately there is [no](https://github.com/gotthardp/erlang-ntlm) erlang library
-for NTLM Authentication, so Python [NTLM library](https://github.com/jborean93/ntlm-auth)
-is used for generating security NTLM headers.
-
-So before starting using NTLM, its required this specific python library to be installed,
-so `etc/auth_script.py` could be successfully called from erlang.
-
 ```erlang
 2> Cred = #{user => <<"myUser">>, password =><<"MyPassOnWin123">>, transport => ntlm}.
 #{password => <<"MyPassOnWin123">>,transport => ntlm, user => <<"myUser">>}
